@@ -20,10 +20,13 @@ const GioHang = () => {
         setCartItems(savedCart);
     }, []);
 
-    const updateQuantity = (id, delta) => {
+    const updateQuantity = (id, delta, loai) => {
         const newCart = cartItems.map(item => {
-            if (item.id === id) {
-                return { ...item, quantity: Math.max(1, (item.quantity || 1) + delta) };
+            if (item.id === id && (item.loai || 'mua') === (loai || 'mua')) {
+                const newQty = Math.max(1, (item.quantity || 1) + delta);
+                // Giới hạn số lượng theo so_luong nếu có
+                const maxQty = item.so_luong || 10;
+                return { ...item, quantity: Math.min(newQty, maxQty) };
             }
             return item;
         });
@@ -31,8 +34,8 @@ const GioHang = () => {
         localStorage.setItem('ivie_cart', JSON.stringify(newCart));
     };
 
-    const removeItem = (id) => {
-        const newCart = cartItems.filter(item => item.id !== id);
+    const removeItem = (id, loai) => {
+        const newCart = cartItems.filter(item => !(item.id === id && (item.loai || 'mua') === (loai || 'mua')));
         setCartItems(newCart);
         localStorage.setItem('ivie_cart', JSON.stringify(newCart));
     };
@@ -103,20 +106,56 @@ const GioHang = () => {
                 <div className="cart-grid">
                     <div className="cart-items">
                         {cartItems.map(item => (
-                            <div key={item.id} className="cart-item">
-                                <img src={item.image_url.startsWith('http') ? item.image_url : `http://localhost:8000${item.image_url}`} alt={item.name} className="cart-item-img" onError={(e) => e.target.src = 'https://placehold.co/100'} />
+                            <div key={`${item.id}-${item.loai || 'mua'}`} className="cart-item" style={item.loai === 'thue' ? {border: '2px solid #3b82f6', background: '#eff6ff'} : {}}>
+                                {item.loai === 'thue' && (
+                                    <div style={{
+                                        position: 'absolute', top: '-10px', left: '10px',
+                                        background: '#3b82f6', color: '#fff', padding: '4px 12px',
+                                        borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600'
+                                    }}>
+                                        🏷️ THUÊ {item.rental_days} NGÀY
+                                    </div>
+                                )}
+                                {item.loai === 'mua' && (
+                                    <div style={{
+                                        position: 'absolute', top: '-10px', left: '10px',
+                                        background: '#f97316', color: '#fff', padding: '4px 12px',
+                                        borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600'
+                                    }}>
+                                        🛒 MUA
+                                    </div>
+                                )}
+                                <img src={item.image_url?.startsWith('http') ? item.image_url : `http://localhost:8000${item.image_url}`} alt={item.name} className="cart-item-img" onError={(e) => e.target.src = 'https://placehold.co/100'} />
                                 <div className="cart-item-info">
                                     <h3>{item.name}</h3>
                                     <p className="item-code">#{item.code}</p>
-                                    <p className="item-price">{new Intl.NumberFormat('vi-VN').format(item.rental_price_day)}đ / ngày</p>
+                                    {item.so_luong !== undefined && item.so_luong <= 3 && (
+                                        <p style={{color: '#d70018', fontSize: '0.85rem', fontWeight: '600', margin: '4px 0'}}>
+                                            ⚠️ Chỉ còn {item.so_luong} sản phẩm
+                                        </p>
+                                    )}
+                                    {item.loai === 'thue' ? (
+                                        <p className="item-price" style={{color: '#3b82f6', fontWeight: '700'}}>
+                                            {new Intl.NumberFormat('vi-VN').format(item.price_to_use || item.rental_price_day * item.rental_days)}đ 
+                                            <span style={{fontSize: '0.8rem', fontWeight: '400'}}> / {item.rental_days} ngày</span>
+                                        </p>
+                                    ) : (
+                                        <p className="item-price" style={{color: '#f97316', fontWeight: '700'}}>
+                                            {new Intl.NumberFormat('vi-VN').format(item.purchase_price || item.price_to_use)}đ
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="cart-item-actions">
                                     <div className="quantity-control">
-                                        <button onClick={() => updateQuantity(item.id, -1)}>-</button>
+                                        <button onClick={() => updateQuantity(item.id, -1, item.loai)}>-</button>
                                         <span>{item.quantity || 1}</span>
-                                        <button onClick={() => updateQuantity(item.id, 1)}>+</button>
+                                        <button 
+                                            onClick={() => updateQuantity(item.id, 1, item.loai)}
+                                            disabled={(item.quantity || 1) >= (item.so_luong || 10)}
+                                            style={{opacity: (item.quantity || 1) >= (item.so_luong || 10) ? 0.5 : 1, cursor: (item.quantity || 1) >= (item.so_luong || 10) ? 'not-allowed' : 'pointer'}}
+                                        >+</button>
                                     </div>
-                                    <button onClick={() => removeItem(item.id)} className="remove-btn">Xóa</button>
+                                    <button onClick={() => removeItem(item.id, item.loai)} className="remove-btn">Xóa</button>
                                 </div>
                             </div>
                         ))}

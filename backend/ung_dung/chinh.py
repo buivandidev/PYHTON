@@ -5,7 +5,7 @@ from .co_so_du_lieu import khoi_tao_csdl
 from .dinh_tuyen import (
     san_pham, dich_vu, lien_he, tap_tin, 
     noi_dung, banner, thu_vien, nguoi_dung, chat, doi_tac,
-    blog, yeu_thich, thong_ke
+    blog, yeu_thich, thong_ke, api_pg
 )
 
 import os
@@ -59,6 +59,7 @@ ung_dung.include_router(doi_tac.bo_dinh_tuyen)
 ung_dung.include_router(blog.bo_dinh_tuyen)
 ung_dung.include_router(yeu_thich.bo_dinh_tuyen)
 ung_dung.include_router(thong_ke.bo_dinh_tuyen)
+ung_dung.include_router(api_pg.bo_dinh_tuyen)
 
 
 @ung_dung.on_event("startup")

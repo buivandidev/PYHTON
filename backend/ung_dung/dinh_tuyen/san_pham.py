@@ -5,7 +5,7 @@ import os
 import shutil
 from datetime import datetime
 from ..co_so_du_lieu import lay_csdl, SanPham as SanPhamDB, DanhGia as DanhGiaDB
-from ..mo_hinh import SanPham, SanPhamTao, DanhGia, DanhGiaCoBan
+from ..mo_hinh import SanPham, SanPhamTao, SanPhamCapNhat, DanhGia, DanhGiaCoBan
 
 bo_dinh_tuyen = APIRouter(
     prefix="/api/san_pham",
@@ -66,7 +66,7 @@ def tao_san_pham(san_pham: SanPhamTao, csdl: Session = Depends(lay_csdl)):
     return san_pham_moi
 
 @bo_dinh_tuyen.put("/{id_san_pham}", response_model=SanPham)
-def cap_nhat_san_pham(id_san_pham: int, san_pham: SanPhamTao, csdl: Session = Depends(lay_csdl)):
+def cap_nhat_san_pham(id_san_pham: int, san_pham: SanPhamCapNhat, csdl: Session = Depends(lay_csdl)):
     """Cập nhật sản phẩm (dành cho admin)"""
     san_pham_cu = csdl.query(SanPhamDB).filter(SanPhamDB.id == id_san_pham).first()
     if not san_pham_cu:

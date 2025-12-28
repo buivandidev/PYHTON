@@ -38,8 +38,8 @@
 
 html {
   scroll-behavior: smooth;
-  background-color: var(--light);
-  /* Ensure white background default */
+  background-color: #ffffff;
+  /* White background for golden leaves to stand out */
 }
 
 body {
@@ -185,6 +185,8 @@ button {
 main {
   min-height: 100vh;
   padding-top: var(--header-height);
+  position: relative;
+  z-index: 2;
 }
 
 @media (max-width: 768px) {

@@ -4,8 +4,11 @@ import { useLocation } from 'react-router-dom';
 const HieuUngLaRoi = () => {
     const location = useLocation();
     const canvasRef = useRef(null);
+    const ctxRef = useRef(null);
     const animationRef = useRef(null);
     const leavesRef = useRef([]);
+    const leafPathRef = useRef(null);
+    const sizeRef = useRef({ width: 0, height: 0 });
 
     // Physics & Scroll State
     const scrollState = useRef({
@@ -39,8 +42,10 @@ const HieuUngLaRoi = () => {
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d', { alpha: true }); // optimize alpha
+        ctxRef.current = ctx;
         let width = window.innerWidth;
         let height = window.innerHeight;
+        sizeRef.current = { width, height };
 
         // High DPI handling
         const dpr = window.devicePixelRatio || 1;
@@ -53,6 +58,7 @@ const HieuUngLaRoi = () => {
         const handleResize = () => {
             width = window.innerWidth;
             height = window.innerHeight;
+            sizeRef.current = { width, height };
             canvas.width = width * dpr;
             canvas.height = height * dpr;
             ctx.scale(dpr, dpr);
@@ -66,6 +72,7 @@ const HieuUngLaRoi = () => {
         const leafCount = 30;
         const leaves = [];
         const leafPath = new Path2D("M20 0C20 0 25 10 25 20C25 35 15 40 10 40C0 40 -5 30 0 15C2 5 20 0 20 0Z");
+        leafPathRef.current = leafPath;
 
         for (let i = 0; i < leafCount; i++) {
             leaves.push(createLeaf(width, height));
@@ -96,7 +103,10 @@ const HieuUngLaRoi = () => {
 
         // Animation Loop
         const render = (timestamp) => {
-            if (!ctx) return;
+            const ctx = ctxRef.current;
+            const leafPath = leafPathRef.current;
+            const { width, height } = sizeRef.current;
+            if (!ctx || !leafPath || !width || !height) return;
             if (!timeRef.current.lastFrameTime) timeRef.current.lastFrameTime = timestamp;
 
             // Calculate Delta Time (in seconds)
@@ -148,11 +158,6 @@ const HieuUngLaRoi = () => {
                 ctx.fillStyle = `rgba(212, 175, 55, ${leaf.opacity})`;
                 ctx.fill(leafPath);
 
-                // Optimized stroke (optional, maybe distinct for high-end feel)
-                ctx.strokeStyle = `rgba(184, 134, 11, ${Math.max(0, leaf.opacity - 0.2)})`;
-                ctx.lineWidth = 1;
-                ctx.stroke(leafPath);
-
                 ctx.restore();
             });
 
@@ -181,8 +186,7 @@ const HieuUngLaRoi = () => {
                 width: '100%',
                 height: '100%',
                 pointerEvents: 'none',
-                zIndex: -1, // Behind content
-                backgroundColor: '#ffffff' // Acts as the page background
+                zIndex: -1
             }}
         />
     );
@@ -203,8 +207,8 @@ function createLeaf(w, h) {
         swayAmp: 0.5 + Math.random() * 1.0, // How far it sways
 
         // Appearance
-        scale: 0.3 + Math.random() * 0.4,
-        opacity: 0.3 + Math.random() * 0.5,
+        scale: 0.5 + Math.random() * 0.5,
+        opacity: 0.85 + Math.random() * 0.15,
         rotation: Math.random() * 360,
         rotationSpeed: (Math.random() - 0.5) * 2
     };
@@ -214,7 +218,7 @@ function resetLeaf(leaf, w) {
     leaf.x = Math.random() * w;
     leaf.y = -60; // Reset above screen
     leaf.speed = 0.5 + Math.random() * 1.0;
-    leaf.opacity = 0.3 + Math.random() * 0.5;
+    leaf.opacity = 0.85 + Math.random() * 0.15;
 }
 
 export default HieuUngLaRoi;

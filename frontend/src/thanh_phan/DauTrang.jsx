@@ -131,7 +131,7 @@ const DauTrang = () => {
 
                         {user ? (
                             <div className="user-menu-container">
-                                <span className="user-name">Chào, {user.full_name.split(' ')[0]}</span>
+                                <span className="user-name" style={{color: '#c9a86c'}}>Chào, {user.full_name.split(' ')[0]}</span>
                                 <div className="user-dropdown">
                                     <Link to="/tai-khoan" className="dropdown-item">Tài khoản của tôi</Link>
                                     <button onClick={logout} className="logout-btn">Đăng xuất</button>

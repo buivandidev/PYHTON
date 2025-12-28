@@ -250,6 +250,26 @@ def ui_san_pham():
     st.header("Quản lý Sản phẩm")
     t1, t2 = st.tabs(["DANH SÁCH", "THÊM MỚI"])
     
+    # Định nghĩa tiểu mục theo danh mục
+    tieu_muc_theo_danh_muc = {
+        "wedding_modern": [
+            ("all", "Tất cả váy cưới"),
+            ("xoe", "Váy Xòe"),
+            ("duoi_ca", "Váy Đuôi Cá"),
+            ("ngan", "Váy Ngắn"),
+        ],
+        "vest": [
+            ("all", "Tất cả Vest"),
+            ("hien_dai", "Vest Hiện Đại"),
+            ("han_quoc", "Vest Hàn Quốc"),
+        ],
+        "aodai": [
+            ("all", "Tất cả Áo Dài"),
+            ("nam", "Áo Dài Nam"),
+            ("nu", "Áo Dài Nữ"),
+        ],
+    }
+    
     with t2:
         st.subheader("📝 Thêm mẫu váy mới")
         with st.form("add_prod"):
@@ -262,10 +282,22 @@ def ui_san_pham():
                 cat = st.selectbox("Danh mục *", ["wedding_modern", "vest", "aodai"], 
                                  format_func=lambda x: {"wedding_modern": "👰 Váy cưới hiện đại", "vest": "🤵 Vest", "aodai": "👘 Áo dài"}[x])
             with c2:
-                sub_cat = st.text_input("Tiểu mục", placeholder="VD: xoe, ngan, dai, nam, nu")
+                # Tiểu mục động theo danh mục
+                sub_cat_options = tieu_muc_theo_danh_muc.get(cat, [("all", "Tất cả")])
+                sub_cat = st.selectbox("Tiểu mục *", 
+                                      options=[x[0] for x in sub_cat_options],
+                                      format_func=lambda x: dict(sub_cat_options).get(x, x))
                 gender = st.selectbox("Giới tính", ["female", "male", "unisex"], 
                                     format_func=lambda x: {"female": "👰 Nữ", "male": "🤵 Nam", "unisex": "👫 Unisex"}[x])
                 is_hot = st.checkbox("🔥 Đánh dấu sản phẩm HOT")
+            
+            # SỐ LƯỢNG VÀ TRẠNG THÁI
+            st.markdown("### 📦 Số lượng & Trạng thái")
+            c1, c2 = st.columns(2)
+            with c1:
+                so_luong = st.number_input("Số lượng tồn kho *", min_value=0, value=10, step=1)
+            with c2:
+                het_hang = st.checkbox("❌ Đánh dấu HẾT HÀNG")
             
             # GIÁ CẢ
             st.markdown("### 💰 Giá cả")
@@ -284,7 +316,9 @@ def ui_san_pham():
                 fabric = st.text_input("Loại vải", placeholder="VD: Ren cao cấp, Lụa Satin")
                 color = st.text_input("Màu sắc", placeholder="VD: Trắng, Kem, Hồng pastel")
             with c2:
-                sizes = st.text_input("Size có sẵn", placeholder="VD: XS, S, M, L, XL hoặc 36-42")
+                sizes = st.multiselect("Size có sẵn *", 
+                                      options=["XS", "S", "M", "L", "XL", "XXL", "Free Size"],
+                                      default=["S", "M", "L"])
                 makeup_tone = st.text_area("Gợi ý tông makeup", placeholder="VD: Tông nude tự nhiên, môi hồng nhẹ", height=80)
             
             description = st.text_area("Mô tả chi tiết sản phẩm", 
@@ -409,10 +443,12 @@ def ui_san_pham():
                             "gender": gender,
                             "fabric_type": fabric or "Cao cấp",
                             "color": color or "Đa dạng",
-                            "recommended_size": sizes or "Đủ size",
+                            "recommended_size": ", ".join(sizes) if sizes else "Đủ size",
                             "makeup_tone": makeup_tone or "Tự nhiên",
                             "description": description or "",
                             "is_hot": is_hot,
+                            "so_luong": so_luong,
+                            "het_hang": het_hang,
                             "accessories": accessories
                         }
                         if call_api("POST", "/api/san_pham/", data=data):
@@ -443,6 +479,25 @@ def ui_san_pham():
             with col_sort:
                 sort_by = st.selectbox("Sắp xếp", ["Mới nhất", "Tên A-Z", "Tên Z-A", "Giá tăng", "Giá giảm"])
             
+            # Lọc tiểu mục theo danh mục đã chọn
+            if filter_cat != "Tất cả":
+                sub_cat_filter_options = {
+                    "wedding_modern": ["Tất cả", "xoe", "duoi_ca", "ngan"],
+                    "vest": ["Tất cả", "hien_dai", "han_quoc"],
+                    "aodai": ["Tất cả", "nam", "nu"],
+                }
+                sub_cat_labels = {
+                    "Tất cả": "Tất cả tiểu mục",
+                    "xoe": "Váy Xòe", "duoi_ca": "Váy Đuôi Cá", "ngan": "Váy Ngắn",
+                    "hien_dai": "Vest Hiện Đại", "han_quoc": "Vest Hàn Quốc",
+                    "nam": "Áo Dài Nam", "nu": "Áo Dài Nữ",
+                }
+                filter_sub = st.selectbox("Tiểu mục", 
+                                         sub_cat_filter_options.get(filter_cat, ["Tất cả"]),
+                                         format_func=lambda x: sub_cat_labels.get(x, x))
+            else:
+                filter_sub = "Tất cả"
+            
             # LỌC DỮ LIỆU
             filtered_prods = prods.copy()
             
@@ -456,6 +511,10 @@ def ui_san_pham():
             # Lọc theo danh mục
             if filter_cat != "Tất cả":
                 filtered_prods = [p for p in filtered_prods if p.get('category') == filter_cat]
+            
+            # Lọc theo tiểu mục
+            if filter_sub != "Tất cả":
+                filtered_prods = [p for p in filtered_prods if p.get('sub_category') == filter_sub]
             
             # Lọc theo HOT
             if filter_hot:
@@ -556,17 +615,45 @@ def ui_san_pham():
                                 new_name = st.text_input("Tên", value=p['name'])
                                 new_code = st.text_input("Mã", value=p['code'])
                                 new_cat = st.selectbox("Danh mục", ["wedding_modern", "vest", "aodai"], 
-                                                     index=["wedding_modern", "vest", "aodai"].index(p['category']) if p['category'] in ["wedding_modern", "vest", "aodai"] else 0)
-                                new_sub = st.text_input("Tiểu mục", value=p.get('sub_category', ''))
+                                                     index=["wedding_modern", "vest", "aodai"].index(p['category']) if p['category'] in ["wedding_modern", "vest", "aodai"] else 0,
+                                                     key=f"cat_{p['id']}")
+                                
+                                # Tiểu mục động theo danh mục
+                                sub_options_edit = {
+                                    "wedding_modern": ["", "xoe", "duoi_ca", "ngan"],
+                                    "vest": ["", "hien_dai", "han_quoc"],
+                                    "aodai": ["", "nam", "nu"],
+                                }
+                                sub_labels_edit = {
+                                    "": "-- Chọn tiểu mục --",
+                                    "xoe": "👗 Váy Xòe", "duoi_ca": "👗 Váy Đuôi Cá", "ngan": "👗 Váy Ngắn",
+                                    "hien_dai": "🤵 Vest Hiện Đại", "han_quoc": "🤵 Vest Hàn Quốc",
+                                    "nam": "👔 Áo Dài Nam", "nu": "👘 Áo Dài Nữ",
+                                }
+                                current_sub = p.get('sub_category', '')
+                                sub_opts = sub_options_edit.get(new_cat, [""])
+                                sub_idx = sub_opts.index(current_sub) if current_sub in sub_opts else 0
+                                new_sub = st.selectbox("Tiểu mục", sub_opts, index=sub_idx,
+                                                      format_func=lambda x: sub_labels_edit.get(x, x),
+                                                      key=f"sub_{p['id']}")
 
                             with c3:
                                 new_price = st.number_input("Giá thuê ngày", value=float(p['rental_price_day']))
                                 new_price_buy = st.number_input("Giá mua", value=float(p.get('purchase_price', 0)))
-                                new_hot = st.checkbox("Hot", value=p.get('is_hot', False))
+                                new_hot = st.checkbox("Hot", value=p.get('is_hot', False), key=f"hot_{p['id']}")
+                                new_so_luong = st.number_input("Số lượng", min_value=0, value=int(p.get('so_luong', 10)), key=f"sl_{p['id']}")
+                                new_het_hang = st.checkbox("Hết hàng", value=p.get('het_hang', False), key=f"hh_{p['id']}")
                                 st.markdown("---")
                                 new_fabric = st.text_input("Loại vải", value=p.get('fabric_type', ''))
                                 new_color = st.text_input("Màu sắc", value=p.get('color', ''))
-                                new_size = st.text_area("Size gợi ý", value=p.get('recommended_size', ''))
+                                # Chuyển size từ string thành list
+                                current_sizes = [s.strip() for s in (p.get('recommended_size', '') or '').split(',') if s.strip()]
+                                all_sizes = ["XS", "S", "M", "L", "XL", "XXL", "Free Size"]
+                                new_size_list = st.multiselect("Size có sẵn", 
+                                                              options=all_sizes,
+                                                              default=[s for s in current_sizes if s in all_sizes],
+                                                              key=f"size_{p['id']}")
+                                new_size = ", ".join(new_size_list) if new_size_list else "Đủ size"
                                 new_makeup = st.text_area("Tông makeup", value=p.get('makeup_tone', ''))
                             with c4:
                                 if st.form_submit_button("LƯU"):
@@ -605,7 +692,8 @@ def ui_san_pham():
                                         "purchase_price": new_price_buy,
                                         "rental_price_week": p.get('rental_price_week', new_price * 5),
                                         "fabric_type": new_fabric, "color": new_color,
-                                        "recommended_size": new_size, "makeup_tone": new_makeup
+                                        "recommended_size": new_size, "makeup_tone": new_makeup,
+                                        "so_luong": new_so_luong, "het_hang": new_het_hang
                                     }
                                     if call_api("PUT", f"/api/san_pham/{p['id']}", data=up_data):
                                         st.session_state[edit_key] = False
@@ -663,7 +751,7 @@ def ui_dich_vu_chuyen_gia():
     t_ex, t_sv = st.tabs(["CHUYÊN GIA", "GÓI DỊCH VỤ"])
     with t_ex:
         with st.expander("THÊM CHUYÊN GIA"):
-             with st.form("add_ex"):
+            with st.form("add_ex"):
                 col1, col2 = st.columns(2)
                 with col1:
                     name = st.text_input("Tên chuyên gia")
@@ -773,13 +861,38 @@ def ui_tu_van_khach_hang():
 
 def ui_duyet_danh_gia():
     st.header("⏳ Quản lý Đánh giá chờ duyệt")
+    
+    # Nút refresh
+    if st.button("🔄 Tải lại"):
+        st.cache_data.clear()
+        st.rerun()
+    
     pending = call_api("GET", "/api/san_pham/admin/danh_gia_cho_duyet", clear_cache=False)
-    if pending:
+    
+    if pending is None:
+        st.error("Không thể kết nối API. Kiểm tra backend đang chạy.")
+    elif len(pending) == 0:
+        st.info("🎉 Không có đánh giá nào đang chờ duyệt!")
+    else:
+        st.success(f"Có {len(pending)} đánh giá đang chờ duyệt")
         for dg in pending:
             with st.container(border=True):
-                st.write(f"Sản phẩm: {dg['product_id']} - {dg['user_name']}: {dg['comment']}")
-                if st.button(f"Duyệt #{dg['id']}"):
-                    if call_api("POST", f"/api/san_pham/admin/duyet_danh_gia/{dg['id']}"): st.toast("Đã duyệt"); st.rerun()
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.write(f"**{dg.get('user_name', 'Ẩn danh')}** - ⭐ {dg.get('rating', 0)}/5")
+                    st.write(f"📦 Sản phẩm ID: {dg.get('product_id')}")
+                    st.caption(dg.get('comment', 'Không có nhận xét'))
+                    if dg.get('image_url'):
+                        st.image(lay_url_anh(dg['image_url']), width=100)
+                with col2:
+                    if st.button(f"✅ Duyệt", key=f"duyet_{dg['id']}"):
+                        if call_api("POST", f"/api/san_pham/admin/duyet_danh_gia/{dg['id']}"):
+                            st.toast("Đã duyệt đánh giá!")
+                            st.rerun()
+                    if st.button(f"❌ Xóa", key=f"xoa_{dg['id']}"):
+                        if call_api("DELETE", f"/api/san_pham/admin/xoa_danh_gia/{dg['id']}"):
+                            st.toast("Đã xóa đánh giá!")
+                            st.rerun()
 
 def ui_doi_tac_khieu_nai():
     st.header("🤝 Quản lý Đối tác & Khiếu nại")
@@ -939,3 +1052,177 @@ elif "Dịch vụ" in choice: ui_dich_vu_chuyen_gia()
 elif "Blog" in choice: ui_blog()
 elif "Nội dung Trang chủ" in choice:
     st.header("Nội dung Trang chủ")
+    
+    tab1, tab2, tab3 = st.tabs(["📖 Câu chuyện IVIE", "⭐ Dịch vụ Cao Cấp", "✨ Điểm nhấn"])
+    
+    # === TAB 1: CÂU CHUYỆN IVIE (about_us) ===
+    with tab1:
+        st.subheader("📖 Quản lý phần Câu chuyện IVIE")
+        
+        # Lấy dữ liệu hiện tại
+        about_data = call_api("GET", "/api/noi_dung/gioi_thieu", clear_cache=False)
+        
+        with st.form("form_about"):
+            col1, col2 = st.columns([1, 2])
+            
+            with col1:
+                st.markdown("**Ảnh hiện tại:**")
+                if about_data and about_data.get('image_url'):
+                    st.image(lay_url_anh(about_data['image_url']), use_container_width=True)
+                else:
+                    st.info("Chưa có ảnh")
+                
+                new_about_img = st.file_uploader("📷 Tải ảnh mới", type=["jpg", "png", "jpeg", "webp"], key="about_img")
+                if new_about_img:
+                    st.image(new_about_img, caption="Xem trước", use_container_width=True)
+            
+            with col2:
+                about_title = st.text_input("Tiêu đề", value=about_data.get('title', 'Câu Chuyện Của IVIE') if about_data else 'Câu Chuyện Của IVIE')
+                about_subtitle = st.text_input("Phụ đề", value=about_data.get('subtitle', 'Hơn 10 năm kinh nghiệm') if about_data else 'Hơn 10 năm kinh nghiệm')
+                about_desc = st.text_area("Mô tả", value=about_data.get('description', '') if about_data else '', height=150)
+                
+                st.markdown("**Thống kê:**")
+                c1, c2, c3 = st.columns(3)
+                with c1:
+                    stat1_num = st.text_input("Số 1", value=about_data.get('stat1_number', '500+') if about_data else '500+')
+                    stat1_label = st.text_input("Nhãn 1", value=about_data.get('stat1_label', 'Cặp Đôi') if about_data else 'Cặp Đôi')
+                with c2:
+                    stat2_num = st.text_input("Số 2", value=about_data.get('stat2_number', '10+') if about_data else '10+')
+                    stat2_label = st.text_input("Nhãn 2", value=about_data.get('stat2_label', 'Năm Kinh Nghiệm') if about_data else 'Năm Kinh Nghiệm')
+                with c3:
+                    stat3_num = st.text_input("Số 3", value=about_data.get('stat3_number', '100%') if about_data else '100%')
+                    stat3_label = st.text_input("Nhãn 3", value=about_data.get('stat3_label', 'Hài Lòng') if about_data else 'Hài Lòng')
+            
+            if st.form_submit_button("💾 LƯU CÂU CHUYỆN", use_container_width=True):
+                img_url = about_data.get('image_url', '') if about_data else ''
+                if new_about_img:
+                    uploaded = upload_image(new_about_img)
+                    if uploaded:
+                        img_url = uploaded
+                
+                update_data = {
+                    "title": about_title,
+                    "subtitle": about_subtitle,
+                    "description": about_desc,
+                    "image_url": img_url,
+                    "stat1_number": stat1_num,
+                    "stat1_label": stat1_label,
+                    "stat2_number": stat2_num,
+                    "stat2_label": stat2_label,
+                    "stat3_number": stat3_num,
+                    "stat3_label": stat3_label
+                }
+                
+                if call_api("PUT", "/api/noi_dung/gioi_thieu", data=update_data):
+                    st.success("✅ Đã cập nhật Câu chuyện IVIE!")
+                    st.rerun()
+    
+    # === TAB 2: DỊCH VỤ CAO CẤP (home_highlights) ===
+    with tab2:
+        st.subheader("⭐ Quản lý 3 Dịch vụ Cao Cấp")
+        st.caption("3 card dịch vụ hiển thị trên trang chủ")
+        
+        # Lấy dữ liệu điểm nhấn
+        highlights = call_api("GET", "/api/noi_dung/diem_nhan", clear_cache=False)
+        if not highlights:
+            highlights = []
+        
+        # Đảm bảo có đủ 3 item
+        while len(highlights) < 3:
+            highlights.append({"id": None, "title": "", "description": "", "image_url": ""})
+        
+        service_names = ["📷 Nhiếp Ảnh Nghệ Thuật", "💄 Trang Điểm Cô Dâu", "👗 Váy Cưới Thiết Kế"]
+        
+        for idx, (hl, svc_name) in enumerate(zip(highlights[:3], service_names)):
+            st.markdown(f"### {svc_name}")
+            with st.form(f"form_highlight_{idx}"):
+                col1, col2 = st.columns([1, 2])
+                
+                with col1:
+                    if hl.get('image_url'):
+                        st.image(lay_url_anh(hl['image_url']), use_container_width=True)
+                    else:
+                        st.info("Chưa có ảnh")
+                    
+                    new_hl_img = st.file_uploader(f"📷 Tải ảnh mới", type=["jpg", "png", "jpeg", "webp"], key=f"hl_img_{idx}")
+                    if new_hl_img:
+                        st.image(new_hl_img, caption="Xem trước", use_container_width=True)
+                
+                with col2:
+                    hl_title = st.text_input("Tiêu đề", value=hl.get('title', ''), key=f"hl_title_{idx}")
+                    hl_desc = st.text_area("Mô tả", value=hl.get('description', ''), key=f"hl_desc_{idx}", height=100)
+                    hl_order = st.number_input("Thứ tự", value=hl.get('order', idx), key=f"hl_order_{idx}")
+                
+                if st.form_submit_button(f"💾 LƯU DỊCH VỤ {idx + 1}", use_container_width=True):
+                    img_url = hl.get('image_url', '')
+                    if new_hl_img:
+                        uploaded = upload_image(new_hl_img)
+                        if uploaded:
+                            img_url = uploaded
+                    
+                    update_data = {
+                        "title": hl_title,
+                        "description": hl_desc,
+                        "image_url": img_url,
+                        "order": hl_order
+                    }
+                    
+                    if hl.get('id'):
+                        # Cập nhật
+                        if call_api("PUT", f"/api/noi_dung/diem_nhan/{hl['id']}", data=update_data):
+                            st.success(f"✅ Đã cập nhật {svc_name}!")
+                            st.rerun()
+                    else:
+                        # Thêm mới
+                        if call_api("POST", "/api/noi_dung/diem_nhan", data=update_data):
+                            st.success(f"✅ Đã thêm {svc_name}!")
+                            st.rerun()
+            
+            st.markdown("---")
+    
+    # === TAB 3: ĐIỂM NHẤN KHÁC ===
+    with tab3:
+        st.subheader("✨ Quản lý các điểm nhấn khác")
+        st.info("Thêm các điểm nhấn bổ sung cho trang chủ")
+        
+        with st.form("form_new_highlight"):
+            st.markdown("**Thêm điểm nhấn mới:**")
+            new_title = st.text_input("Tiêu đề")
+            new_desc = st.text_area("Mô tả")
+            new_img = st.file_uploader("Ảnh", type=["jpg", "png", "jpeg", "webp"])
+            new_order = st.number_input("Thứ tự", value=10)
+            
+            if st.form_submit_button("➕ THÊM ĐIỂM NHẤN"):
+                img_url = ""
+                if new_img:
+                    img_url = upload_image(new_img) or ""
+                
+                if call_api("POST", "/api/noi_dung/diem_nhan", data={
+                    "title": new_title,
+                    "description": new_desc,
+                    "image_url": img_url,
+                    "order": new_order
+                }):
+                    st.success("✅ Đã thêm điểm nhấn mới!")
+                    st.rerun()
+        
+        # Danh sách điểm nhấn hiện có
+        st.markdown("### Danh sách điểm nhấn")
+        all_highlights = call_api("GET", "/api/noi_dung/diem_nhan", clear_cache=False)
+        if all_highlights:
+            for hl in all_highlights:
+                with st.container(border=True):
+                    c1, c2, c3 = st.columns([1, 3, 1])
+                    with c1:
+                        if hl.get('image_url'):
+                            st.image(lay_url_anh(hl['image_url']), use_container_width=True)
+                    with c2:
+                        st.write(f"**{hl.get('title', 'Không có tiêu đề')}**")
+                        st.caption(hl.get('description', ''))
+                    with c3:
+                        if st.button("🗑️ XÓA", key=f"del_hl_{hl['id']}"):
+                            if call_api("DELETE", f"/api/noi_dung/diem_nhan/{hl['id']}"):
+                                st.success("Đã xóa!")
+                                st.rerun()
+        else:
+            st.info("Chưa có điểm nhấn nào")

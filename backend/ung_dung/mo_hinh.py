@@ -21,9 +21,32 @@ class SanPhamCoBan(BaseModel):
     color: str | None = None
     recommended_size: str | None = None
     makeup_tone: str | None = None
+    # Số lượng và hết hàng
+    so_luong: int | None = 10
+    het_hang: bool | None = False
 
 class SanPhamTao(SanPhamCoBan):
     pass
+
+class SanPhamCapNhat(BaseModel):
+    name: str | None = None
+    code: str | None = None
+    category: str | None = None
+    sub_category: str | None = None
+    gender: str | None = None
+    description: str | None = None
+    rental_price_day: float | None = None
+    rental_price_week: float | None = None
+    purchase_price: float | None = None
+    image_url: str | None = None
+    is_new: bool | None = None
+    is_hot: bool | None = None
+    fabric_type: str | None = None
+    color: str | None = None
+    recommended_size: str | None = None
+    makeup_tone: str | None = None
+    so_luong: int | None = None
+    het_hang: bool | None = None
 
 class SanPham(SanPhamCoBan):
     id: int

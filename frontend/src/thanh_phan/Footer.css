@@ -2,6 +2,8 @@
     background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
     color: #ffffff;
     padding: 4rem 0 2rem;
+    position: relative;
+    z-index: 2;
 }
 
 .footer-content {

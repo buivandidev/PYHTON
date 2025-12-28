@@ -11,10 +11,12 @@ const api = axios.create({
 
 // Products API (API Sản phẩm)
 export const sanPhamAPI = {
-    layTatCa: (params) => api.get('/api/san_pham', { params }),
-    layTheoId: (id) => api.get(`/api/san_pham/${id}`),
+    layTatCa: (params) => api.get('/api/san_pham', { params, headers: { 'Cache-Control': 'no-cache' } }),
+    layTheoId: (id) => api.get(`/api/san_pham/${id}`, { headers: { 'Cache-Control': 'no-cache' } }),
     layDanhGia: (id) => api.get(`/api/san_pham/${id}/danh_gia`),
-    guiDanhGia: (id, formData) => api.post(`/api/san_pham/${id}/danh_gia`, formData),
+    guiDanhGia: (id, formData) => api.post(`/api/san_pham/${id}/danh_gia`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    }),
 
     // Admin Review Moderation
     adminLayDanhGiaChoDuyet: () => api.get('/api/san_pham/admin/danh_gia_cho_duyet'),

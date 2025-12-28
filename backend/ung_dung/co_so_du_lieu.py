@@ -42,6 +42,9 @@ class SanPham(CoSo):
     color = Column(String)
     recommended_size = Column(Text)
     makeup_tone = Column(Text)
+    # Số lượng và hết hàng
+    so_luong = Column(Integer, default=10)
+    het_hang = Column(Boolean, default=False)
 
 class ChuyenGia(CoSo):
     __tablename__ = "experts"

@@ -1,9 +1,9 @@
-import SmartAlbumGallery from '../thanh_phan/SmartAlbumGallery';
-import ImageTagging, { sampleTags } from '../thanh_phan/ImageTagging';
-import BeforeAfterSlider from '../thanh_phan/BeforeAfterSlider';
-import MasonryGallery from '../thanh_phan/MasonryGallery';
-import AlternatingGallery from '../thanh_phan/AlternatingGallery';
-import GoldenRatioGallery, { sampleGoldenImages } from '../thanh_phan/GoldenRatioGallery';
+import AlbumThongMinh from '../thanh_phan/AlbumThongMinh';
+import GanTheSanPham, { duLieuTheMau } from '../thanh_phan/GanTheSanPham';
+import ThanhTruotTruocSau from '../thanh_phan/ThanhTruotTruocSau';
+import BoSuuTapGach from '../thanh_phan/BoSuuTapGach';
+import BoSuuTapDanXen from '../thanh_phan/BoSuuTapDanXen';
+import BoSuuTapTiLeVang, { duLieuAnhTiLeVangMau } from '../thanh_phan/BoSuuTapTiLeVang';
 
 const GalleryDemo = () => {
   // Sample data for Smart Album Gallery
@@ -75,67 +75,67 @@ const GalleryDemo = () => {
         <section className="mb-20">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Smart Album Gallery
+              Album Thông Minh
             </h2>
             <p className="text-gray-600">
               Click vào ảnh để xem phóng to với hiệu ứng mượt mà
             </p>
           </div>
-          <SmartAlbumGallery images={galleryImages} />
+          <AlbumThongMinh danhSachAnh={galleryImages} />
         </section>
 
         {/* Section 3: Masonry Gallery */}
         <section className="mb-20">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Masonry Gallery - Bố Cục Đan Xen
+              Bộ Sưu Tập Gạch
             </h2>
             <p className="text-gray-600">
               Ảnh đứng và ảnh ngang tự nhiên, hover để zoom và tăng sáng
             </p>
           </div>
-          <MasonryGallery images={galleryImages} />
+          <BoSuuTapGach danhSachAnh={galleryImages} />
         </section>
 
         {/* Section 4: Alternating Layout */}
         <section className="mb-20">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Alternating Layout - Đan Xen Trái Phải
+              Bộ Sưu Tập Đan Xen
             </h2>
             <p className="text-gray-600">
               Bố cục đảo chiều mỗi hàng với hiệu ứng fade-in on scroll
             </p>
           </div>
-          <AlternatingGallery images={galleryImages} />
+          <BoSuuTapDanXen danhSachAnh={galleryImages} />
         </section>
 
         {/* Section 5: Golden Ratio Gallery */}
         <section className="mb-20">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Golden Ratio Gallery - Tỉ Lệ Vàng
+              Bộ Sưu Tập Tỉ Lệ Vàng
             </h2>
             <p className="text-gray-600">
               Ảnh theo tỉ lệ 3:2 và 2:3 với viền vàng sang trọng
             </p>
           </div>
-          <GoldenRatioGallery images={sampleGoldenImages} />
+          <BoSuuTapTiLeVang danhSachAnh={duLieuAnhTiLeVangMau} />
         </section>
 
         {/* Section 6: Image Tagging */}
         <section className="mb-20">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Image Tagging - Gắn Thẻ Sản Phẩm
+              Gắn Thẻ Sản Phẩm
             </h2>
             <p className="text-gray-600">
               Click vào các điểm sáng để khám phá sản phẩm
             </p>
           </div>
-          <ImageTagging
-            imageUrl="https://images.unsplash.com/photo-1519741497674-611481863552?w=1200"
-            tags={sampleTags}
+          <GanTheSanPham
+            duongDanAnh="https://images.unsplash.com/photo-1519741497674-611481863552?w=1200"
+            danhSachThe={duLieuTheMau}
           />
         </section>
 
@@ -143,16 +143,16 @@ const GalleryDemo = () => {
         <section className="mb-20">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Before & After Slider
+              Thanh Trượt Trước & Sau
             </h2>
             <p className="text-gray-600">
               Kéo thanh trượt để so sánh ảnh trước và sau chỉnh sửa
             </p>
           </div>
-          <BeforeAfterSlider
-            beforeImage="https://images.unsplash.com/photo-1519741497674-611481863552?w=1200"
-            afterImage="https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&sat=-100&brightness=1.2"
-            alt="Wedding Dress Editing"
+          <ThanhTruotTruocSau
+            anhTruoc="https://images.unsplash.com/photo-1519741497674-611481863552?w=1200"
+            anhSau="https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&sat=-100&brightness=1.2"
+            moTa="Chỉnh sửa váy cưới"
           />
         </section>
 
