@@ -62,6 +62,14 @@ export const khieuNaiAPI = {
     adminTraLoi: (id, reply) => api.post(`/api/doi_tac/admin/khieu_nai/${id}/tra_loi?reply=${encodeURIComponent(reply)}`),
 };
 
+// Order API (API Đơn hàng)
+export const donHangAPI = {
+    tao: (duLieu) => api.post('/api/don_hang/', duLieu),
+    layTatCa: () => api.get('/api/don_hang/'),
+    layTheoId: (id) => api.get(`/api/don_hang/${id}`),
+    capNhat: (id, duLieu) => api.put(`/api/don_hang/${id}`, duLieu),
+};
+
 
 // Nội dung trang chủ
 export const noiDungAPI = {

@@ -79,6 +79,7 @@ st.title("IVIE STUDIO ADMIN")
 with st.sidebar:
     choice = st.selectbox("MENU QUẢN TRỊ", [
         "📊 Tổng quan",
+        "🛒 Quản lý Đơn hàng",
         "📞 Liên hệ khách hàng",
         "💬 Tư vấn khách hàng",
         "⏳ Duyệt Đánh Giá",
@@ -1016,6 +1017,89 @@ def ui_blog():
         else:
             st.info("Chưa có bài viết nào.")
 
+def ui_don_hang():
+    st.header("🛒 Quản lý Đơn hàng")
+    
+    # Nút refresh
+    if st.button("🔄 Làm mới danh sách"):
+        st.cache_data.clear()
+        st.rerun()
+    
+    # Lấy danh sách đơn hàng - không cache để luôn lấy dữ liệu mới nhất
+    don_hang_list = call_api("GET", "/api/don_hang/", clear_cache=True)
+    
+    if not don_hang_list:
+        st.info("Chưa có đơn hàng nào.")
+        return
+    
+    # Bộ lọc
+    col1, col2 = st.columns(2)
+    with col1:
+        search = st.text_input("🔍 Tìm kiếm", placeholder="Tên, SĐT, email...")
+    with col2:
+        status_filter = st.selectbox("Trạng thái", ["Tất cả", "Chờ xử lý", "Đang xử lý", "Đã giao", "Đã hủy"])
+    
+    # Lọc dữ liệu
+    filtered = don_hang_list
+    if search:
+        filtered = [d for d in filtered if search.lower() in str(d).lower()]
+    if status_filter == "Chờ xử lý":
+        filtered = [d for d in filtered if d.get('status') == 'pending']
+    elif status_filter == "Đang xử lý":
+        filtered = [d for d in filtered if d.get('status') == 'processing']
+    elif status_filter == "Đã giao":
+        filtered = [d for d in filtered if d.get('status') == 'delivered']
+    elif status_filter == "Đã hủy":
+        filtered = [d for d in filtered if d.get('status') == 'cancelled']
+    
+    st.write(f"📦 Tổng: **{len(filtered)}** đơn hàng")
+    
+    # Hiển thị đơn hàng
+    for dh in filtered:
+        status = dh.get('status', 'pending')
+        status_color = {
+            'pending': '🟡',
+            'processing': '🔵', 
+            'shipped': '🟣',
+            'delivered': '🟢',
+            'cancelled': '🔴'
+        }.get(status, '⚪')
+        status_text = {
+            'pending': 'Chờ xử lý',
+            'processing': 'Đang xử lý',
+            'shipped': 'Đang giao',
+            'delivered': 'Đã giao',
+            'cancelled': 'Đã hủy'
+        }.get(status, status)
+        
+        with st.container(border=True):
+            c1, c2, c3 = st.columns([3, 2, 1])
+            with c1:
+                st.write(f"**#{dh.get('id')}** - {dh.get('customer_name')}")
+                st.write(f"📞 {dh.get('customer_phone')} | ✉️ {dh.get('customer_email')}")
+                st.write(f"📍 {dh.get('shipping_address')}")
+            with c2:
+                st.write(f"💰 **{dh.get('total_amount', 0):,.0f}đ**")
+                st.write(f"{status_color} {status_text}")
+                # Ngày đặt
+                order_date = dh.get('order_date', '')
+                if order_date:
+                    st.caption(f"🕐 {order_date[:16] if len(order_date) > 16 else order_date}")
+            with c3:
+                new_status = st.selectbox(
+                    "Cập nhật",
+                    ["pending", "processing", "shipped", "delivered", "cancelled"],
+                    index=["pending", "processing", "shipped", "delivered", "cancelled"].index(status) if status in ["pending", "processing", "shipped", "delivered", "cancelled"] else 0,
+                    key=f"status_{dh['id']}",
+                    format_func=lambda x: {'pending': 'Chờ xử lý', 'processing': 'Đang xử lý', 'shipped': 'Đang giao', 'delivered': 'Đã giao', 'cancelled': 'Đã hủy'}.get(x, x),
+                    label_visibility="collapsed"
+                )
+                if new_status != status:
+                    if st.button("💾 Lưu", key=f"save_{dh['id']}"):
+                        if call_api("PUT", f"/api/don_hang/{dh['id']}", data={"status": new_status}):
+                            st.toast("Đã cập nhật trạng thái!")
+                            st.rerun()
+
 # --- Main Layout ---
 if "Tổng quan" in choice:
     st.header("Tổng quan")
@@ -1042,6 +1126,7 @@ if "Tổng quan" in choice:
         with c2: st.metric("LIÊN HỆ MỚI", len([c for c in (contacts or []) if c.get('status') == 'pending']))
 
 elif "Liên hệ" in choice: ui_lien_he()
+elif "Đơn hàng" in choice: ui_don_hang()
 elif "Tư vấn" in choice: ui_tu_van_khach_hang()
 elif "Duyệt Đánh Giá" in choice: ui_duyet_danh_gia()
 elif "Banner" in choice: ui_banner()

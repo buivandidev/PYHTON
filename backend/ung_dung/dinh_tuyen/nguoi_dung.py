@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Header
 from sqlalchemy.orm import Session
 from ..co_so_du_lieu import lay_csdl, NguoiDung as NguoiDungDB, DonHang as DonHangDB, MaGiamGia as MaGiamGiaDB
 from ..mo_hinh import (
@@ -21,7 +21,10 @@ bo_dinh_tuyen = APIRouter(
 SECRET_KEY = config('SECRET_KEY', default='secret_key_mac_dinh_rat_dai_va_bao_mat_123')
 ALGORITHM = "HS256"
 
-def lay_user_hien_tai(token: str, csdl: Session = Depends(lay_csdl)):
+def lay_user_tu_token(token: str, csdl: Session):
+    """Giải mã token và lấy user"""
+    if not token:
+        raise HTTPException(status_code=401, detail="Token không được cung cấp")
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
@@ -34,6 +37,10 @@ def lay_user_hien_tai(token: str, csdl: Session = Depends(lay_csdl)):
     if user is None:
         raise HTTPException(status_code=401, detail="Người dùng không tồn tại")
     return user
+
+# Alias cho tương thích ngược với các file khác
+def lay_user_hien_tai(token: str, csdl: Session):
+    return lay_user_tu_token(token, csdl)
 
 class DangNhapForm(BaseModel):
     username: str
@@ -93,9 +100,12 @@ def dang_nhap(du_lieu: DangNhapForm, csdl: Session = Depends(lay_csdl)):
     }
 
 @bo_dinh_tuyen.put("/cap_nhat", response_model=NguoiDungSchema)
-def cap_nhat_profile(du_lieu: NguoiDungCapNhat, token: str, csdl: Session = Depends(lay_csdl)):
+def cap_nhat_profile(du_lieu: NguoiDungCapNhat, authorization: Optional[str] = Header(None, alias="Authorization"), csdl: Session = Depends(lay_csdl)):
     """Cập nhật thông tin cá nhân"""
-    user = lay_user_hien_tai(token, csdl)
+    token = None
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization[7:]
+    user = lay_user_tu_token(token, csdl)
     
     if du_lieu.full_name:
         user.full_name = du_lieu.full_name
@@ -112,16 +122,36 @@ def cap_nhat_profile(du_lieu: NguoiDungCapNhat, token: str, csdl: Session = Depe
     csdl.refresh(user)
     return user
 
-@bo_dinh_tuyen.get("/don_hang", response_model=list[DonHangSchema])
-def lay_lich_su_don_hang(token: str, csdl: Session = Depends(lay_csdl)):
+@bo_dinh_tuyen.get("/don_hang")
+def lay_lich_su_don_hang(authorization: Optional[str] = Header(None, alias="Authorization"), csdl: Session = Depends(lay_csdl)):
     """Lấy danh sách đơn hàng của người dùng"""
-    user = lay_user_hien_tai(token, csdl)
-    return user.orders
+    token = None
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization[7:]
+    user = lay_user_tu_token(token, csdl)
+    # Trả về danh sách đơn hàng dạng dict
+    orders = csdl.query(DonHangDB).filter(DonHangDB.user_id == user.id).order_by(DonHangDB.order_date.desc()).all()
+    return [
+        {
+            "id": o.id,
+            "customer_name": o.customer_name,
+            "customer_email": o.customer_email,
+            "customer_phone": o.customer_phone,
+            "shipping_address": o.shipping_address,
+            "total_amount": o.total_amount,
+            "status": o.status,
+            "order_date": o.order_date.isoformat() if o.order_date else None
+        }
+        for o in orders
+    ]
 
 @bo_dinh_tuyen.post("/kiem_tra_giam_gia")
-def kiem_tra_giam_gia(token: str, csdl: Session = Depends(lay_csdl)):
+def kiem_tra_giam_gia(authorization: Optional[str] = Header(None, alias="Authorization"), csdl: Session = Depends(lay_csdl)):
     """Kiểm tra quyền lợi giảm giá 5% cho khách cũ"""
-    user = lay_user_hien_tai(token, csdl)
+    token = None
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization[7:]
+    user = lay_user_tu_token(token, csdl)
     
     # Kiểm tra xem có đơn hàng thành công nào chưa
     don_hang_cu = csdl.query(DonHangDB).filter(

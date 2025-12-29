@@ -39,10 +39,17 @@ const TaiKhoan = () => {
 
     const fetchOrders = async (token) => {
         try {
+            console.log("Fetching orders with token:", token);
             const res = await nguoiDungAPI.layDonHang(token);
-            setDonHangs(res.data);
+            console.log("Orders response:", res.data);
+            // Handle cả trường hợp res.data là array hoặc object
+            const orders = Array.isArray(res.data) ? res.data : (res.data?.orders || res.data?.value || []);
+            console.log("Parsed orders:", orders);
+            setDonHangs(orders);
         } catch (error) {
             console.error("Lỗi lấy đơn hàng:", error);
+            console.error("Error response:", error.response?.data);
+            setDonHangs([]);
         }
     };
 
@@ -72,6 +79,9 @@ const TaiKhoan = () => {
 
     if (!user) return <div className="container" style={{ padding: '100px 0', textAlign: 'center' }}>Vui lòng đăng nhập để xem thông tin.</div>;
 
+    // Debug: log khi render
+    console.log("Rendering TaiKhoan, activeTab:", activeTab, "donHangs:", donHangs);
+
     return (
         <div className="auth-container" style={{ marginTop: '100px', maxWidth: '800px' }}>
             <div className="auth-card">
@@ -86,7 +96,7 @@ const TaiKhoan = () => {
                         onClick={() => setActiveTab('orders')}
                         style={{ padding: '10px 20px', background: 'none', border: 'none', borderBottom: activeTab === 'orders' ? '2px solid #d4af37' : 'none', color: activeTab === 'orders' ? '#d4af37' : '#666', fontWeight: 'bold', cursor: 'pointer' }}
                     >
-                        Đơn hàng của tôi
+                        Đơn hàng của tôi ({donHangs.length})
                     </button>
                 </div>
 
@@ -118,23 +128,37 @@ const TaiKhoan = () => {
                     </form>
                 ) : (
                     <div className="order-history">
-                        {donHangs.length === 0 ? (
-                            <p style={{ textAlign: 'center', color: '#666' }}>Bạn chưa có đơn hàng nào.</p>
-                        ) : (
+                        {donHangs && donHangs.length > 0 ? (
                             donHangs.map(order => (
-                                <div key={order.id} style={{ padding: '15px', border: '1px solid #eee', borderRadius: '8px', marginBottom: '15px' }}>
+                                <div key={order.id} style={{ padding: '15px', border: '1px solid #eee', borderRadius: '8px', marginBottom: '15px', background: '#fff' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                                        <span style={{ fontWeight: 'bold' }}>Mã đơn: #{order.id}</span>
-                                        <span style={{ color: '#d4af37' }}>{order.status}</span>
+                                        <span style={{ fontWeight: 'bold', color: '#333' }}>Mã đơn: #{order.id}</span>
+                                        <span style={{ 
+                                            color: order.status === 'delivered' ? '#28a745' : 
+                                                   order.status === 'processing' ? '#007bff' : 
+                                                   order.status === 'cancelled' ? '#dc3545' : '#d4af37',
+                                            fontWeight: 'bold'
+                                        }}>
+                                            {order.status === 'pending' ? '⏳ Chờ xử lý' :
+                                             order.status === 'processing' ? '🔄 Đang xử lý' :
+                                             order.status === 'shipped' ? '🚚 Đang giao' :
+                                             order.status === 'delivered' ? '✅ Đã giao' :
+                                             order.status === 'cancelled' ? '❌ Đã hủy' : order.status}
+                                        </span>
                                     </div>
-                                    <div style={{ fontSize: '0.9rem', color: '#666' }}>
-                                        Ngày đặt: {new Date(order.order_date).toLocaleDateString('vi-VN')}
+                                    <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '5px' }}>
+                                        📅 Ngày đặt: {order.order_date ? new Date(order.order_date).toLocaleDateString('vi-VN') : 'N/A'}
                                     </div>
-                                    <div style={{ textAlign: 'right', fontWeight: 'bold', marginTop: '10px' }}>
-                                        Tổng: {order.total_amount.toLocaleString()}đ
+                                    <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '5px' }}>
+                                        📍 Địa chỉ: {order.shipping_address}
+                                    </div>
+                                    <div style={{ textAlign: 'right', fontWeight: 'bold', marginTop: '10px', color: '#d4af37', fontSize: '1.1rem' }}>
+                                        Tổng: {(order.total_amount || 0).toLocaleString()}đ
                                     </div>
                                 </div>
                             ))
+                        ) : (
+                            <p style={{ textAlign: 'center', color: '#666' }}>Bạn chưa có đơn hàng nào.</p>
                         )}
                     </div>
                 )}

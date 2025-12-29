@@ -6,6 +6,7 @@ import { bannerAPI, noiDungAPI, thuVienAPI, layUrlHinhAnh } from '../api/khach_h
 import NutBam from '../thanh_phan/NutBam';
 import The from '../thanh_phan/The';
 import HieuUngSong from '../thanh_phan/HieuUngSong';
+import HieuUngHat from '../thanh_phan/HieuUngHat';
 import WrapperAtropos from '../thanh_phan/WrapperAtropos';
 import '../styles/Home.css';
 
@@ -136,7 +137,68 @@ const TrangChu = () => {
                 <HieuUngSong />
             </section>
 
-            {/* Intro/About Section (Dynamic) */}
+            {/* Khung hiệu ứng hạt */}
+            <section style={{ 
+                padding: '40px 20px',
+                background: '#fff'
+            }}>
+                <div style={{
+                    position: 'relative',
+                    width: 'calc(100% - 280px)',
+                    maxWidth: '1600px',
+                    height: '800px',
+                    margin: '0 auto',
+                    background: '#000',
+                    borderRadius: '24px',
+                    overflow: 'hidden'
+                }}>
+                    <HieuUngHat particleCount={200} nenTrang={false} />
+                    
+                    {/* Content overlay */}
+                    <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        zIndex: 10,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        padding: '50px',
+                        pointerEvents: 'none'
+                    }}>
+                        <h2 style={{
+                            color: '#fff',
+                            fontSize: '36px',
+                            fontWeight: 400,
+                            lineHeight: 1.3,
+                            marginBottom: '20px',
+                            fontFamily: 'Playfair Display, serif'
+                        }}>
+                            Khám Phá<br/>
+                            Vẻ Đẹp<br/>
+                            Tinh Tế
+                        </h2>
+                        
+                        <div style={{ display: 'flex', gap: '12px', pointerEvents: 'auto' }}>
+                            <Link to="/san-pham" style={{
+                                padding: '12px 24px',
+                                background: 'transparent',
+                                color: '#c9a86c',
+                                fontSize: '14px',
+                                fontWeight: 500,
+                                borderRadius: '50px',
+                                border: '2px solid #c9a86c',
+                                cursor: 'pointer',
+                                textDecoration: 'none'
+                            }}>
+                                Xem Bộ Sưu Tập
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </section>
             <section className="section about-section">
                 <div className="container">
                     <div className="about-grid">
@@ -173,7 +235,7 @@ const TrangChu = () => {
             </section>
 
             {/* Services Highlights Section (Dynamic) */}
-            <section className="services section bg-secondary" id="services" style={{ backgroundColor: 'var(--secondary)' }}>
+            <section className="services section" id="services" style={{ backgroundColor: 'var(--secondary)' }}>
                 <div className="container">
                     <div className="section-header fade-in-section">
                         <h2 className="section-title">Dịch Vụ Cao Cấp</h2>

@@ -244,7 +244,21 @@
 .order-history {
     max-height: 400px;
     overflow-y: auto;
-    padding-right: 5px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.order-history > div {
+    background: #fff !important;
+    border: 1px solid #ddd !important;
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.order-history p {
+    color: #666;
 }
 
 .order-history::-webkit-scrollbar {

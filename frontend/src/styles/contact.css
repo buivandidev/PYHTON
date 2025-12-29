@@ -164,12 +164,22 @@ select,
 textarea {
     padding: 0.8rem 1rem;
     border: 1px solid #333;
-    background: #0a0a0a;
-    color: white;
+    background: #1a1a1a !important;
+    color: #fff !important;
     border-radius: 8px;
     font-family: var(--font-sans);
     font-size: 1rem;
     transition: var(--transition);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #666;
+}
+
+/* Fix cho input date */
+input[type="date"] {
+    color-scheme: dark;
 }
 
 

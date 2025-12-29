@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { thuVienAPI, layUrlHinhAnh } from '../api/khach_hang';
 import BoSuuTapGach from '../thanh_phan/BoSuuTapGach';
+import HieuUngHat from '../thanh_phan/HieuUngHat';
 
 const ThuVien = () => {
     const [danhSachAnh, setDanhSachAnh] = useState([]);
@@ -65,74 +66,94 @@ const ThuVien = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
-            {/* Phần Hero với hiệu ứng cuộn phóng to */}
-            <div ref={phanHeroRef} className="relative h-[200vh]">
-                <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#f8f6f3] to-[#e8e4df]">
+            {/* Khung hiệu ứng hạt ở đầu trang */}
+            <section style={{ 
+                padding: '120px 20px 40px',
+                background: '#fff',
+                position: 'relative',
+                overflow: 'hidden'
+            }}>
+                <div style={{
+                    position: 'relative',
+                    width: '100%',
+                    maxWidth: '100%',
+                    height: '700px',
+                    margin: '0 auto',
+                    background: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}>
+                    <HieuUngHat particleCount={800} nenTrang={true} />
                     
-                    {/* Nền trang trí */}
-                    <motion.div 
-                        className="absolute inset-0 opacity-10"
-                        style={{ opacity: useTransform(tienTrinhCuon, [0, 0.5], [0.1, 0.3]) }}
-                    >
-                        <div className="absolute top-20 left-20 w-64 h-64 bg-[#b59410] rounded-full blur-3xl" />
-                        <div className="absolute bottom-20 right-20 w-96 h-96 bg-[#d4af37] rounded-full blur-3xl" />
-                    </motion.div>
-
-                    {/* Ảnh Hero chính với hiệu ứng phóng to */}
-                    {danhSachAnh.length > 0 && (
-                        <motion.div
-                            style={{ scale: tiLe, opacity: doMo }}
-                            className="relative z-10"
-                        >
-                            <img
-                                src={layUrlHinhAnh(danhSachAnh[0].image_url)}
-                                alt="Thư viện IVIE Studio"
-                                className="w-[500px] h-[700px] object-cover rounded-lg shadow-2xl"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent rounded-lg" />
-                        </motion.div>
-                    )}
-
-                    {/* Chữ tiêu đề */}
-                    <motion.div
-                        style={{ opacity: doMoChu }}
-                        className="absolute top-1/4 left-1/2 transform -translate-x-1/2 text-center z-20"
-                    >
-                        <h1 className="text-6xl md:text-8xl font-serif text-[#2c2c2c] mb-4 tracking-wider">
-                            IVIE STUDIO
+                    {/* Content overlay căn giữa */}
+                    <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        zIndex: 10,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '50px',
+                        pointerEvents: 'none',
+                        textAlign: 'center'
+                    }}>
+                        <h1 style={{
+                            color: '#1a1a1a',
+                            fontSize: '52px',
+                            fontWeight: 700,
+                            lineHeight: 1.2,
+                            marginBottom: '16px',
+                            fontFamily: 'system-ui, -apple-system, sans-serif'
+                        }}>
+                            Thư Viện Ảnh IVIE
                         </h1>
-                        <p className="text-xl md:text-2xl text-[#6b6b6b] font-light tracking-widest">
-                            Thư Viện Khoảnh Khắc Hạnh Phúc
+                        <p style={{
+                            color: '#666',
+                            fontSize: '18px',
+                            maxWidth: '400px',
+                            marginBottom: '30px'
+                        }}>
+                            Khoảnh khắc hạnh phúc của các cặp đôi
                         </p>
-                    </motion.div>
-
-                    {/* Chỉ báo cuộn */}
-                    <motion.div
-                        style={{ opacity: useTransform(tienTrinhCuon, [0, 0.2], [1, 0]) }}
-                        className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20"
-                    >
-                        <motion.div
-                            animate={{ y: [0, 10, 0] }}
-                            transition={{ duration: 1.5, repeat: Infinity }}
-                            className="flex flex-col items-center"
-                        >
-                            <span className="text-[#6b6b6b] text-sm mb-2 tracking-widest">CUỘN XUỐNG</span>
-                            <svg className="w-6 h-6 text-[#b59410]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                            </svg>
-                        </motion.div>
-                    </motion.div>
-
-                    {/* Thanh tiến trình */}
-                    <motion.div
-                        className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#b59410] to-[#d4af37] origin-left z-30"
-                        style={{ scaleX: tienTrinhCuon }}
-                    />
+                        <div style={{ display: 'flex', gap: '16px', pointerEvents: 'auto' }}>
+                            <a href="/lien-he" style={{
+                                padding: '14px 28px',
+                                background: '#1a1a1a',
+                                color: '#fff',
+                                fontSize: '14px',
+                                fontWeight: 600,
+                                borderRadius: '8px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                textDecoration: 'none'
+                            }}>
+                                Đặt Lịch Chụp
+                            </a>
+                            <a href="/san-pham" style={{
+                                padding: '14px 28px',
+                                background: 'transparent',
+                                color: '#1a1a1a',
+                                fontSize: '14px',
+                                fontWeight: 600,
+                                borderRadius: '8px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                textDecoration: 'none'
+                            }}>
+                                Xem Sản Phẩm →
+                            </a>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </section>
 
             {/* Phần Gallery */}
-            <div className="py-12">
+            <div className="py-12" style={{ marginTop: '80px' }}>
                 <div className="container mx-auto px-4">
                 {/* Phần đầu với hiệu ứng chữ */}
                 <div className="text-center mb-12 relative">
@@ -263,6 +284,72 @@ const ThuVien = () => {
                 </motion.div>
             </div>
         </div>
+
+            {/* Phần Hero với hiệu ứng cuộn phóng to - đã dời xuống cuối */}
+            <div ref={phanHeroRef} className="relative h-[200vh]">
+                <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#f8f6f3] to-[#e8e4df]">
+                    
+                    {/* Nền trang trí */}
+                    <motion.div 
+                        className="absolute inset-0 opacity-10"
+                        style={{ opacity: useTransform(tienTrinhCuon, [0, 0.5], [0.1, 0.3]) }}
+                    >
+                        <div className="absolute top-20 left-20 w-64 h-64 bg-[#b59410] rounded-full blur-3xl" />
+                        <div className="absolute bottom-20 right-20 w-96 h-96 bg-[#d4af37] rounded-full blur-3xl" />
+                    </motion.div>
+
+                    {/* Ảnh Hero chính với hiệu ứng phóng to */}
+                    {danhSachAnh.length > 0 && (
+                        <motion.div
+                            style={{ scale: tiLe, opacity: doMo }}
+                            className="relative z-10"
+                        >
+                            <img
+                                src={layUrlHinhAnh(danhSachAnh[0].image_url)}
+                                alt="Thư viện IVIE Studio"
+                                className="w-[500px] h-[700px] object-cover rounded-lg shadow-2xl"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent rounded-lg" />
+                        </motion.div>
+                    )}
+
+                    {/* Chữ tiêu đề */}
+                    <motion.div
+                        style={{ opacity: doMoChu }}
+                        className="absolute top-1/4 left-1/2 transform -translate-x-1/2 text-center z-20"
+                    >
+                        <h1 className="text-6xl md:text-8xl font-serif text-[#2c2c2c] mb-4 tracking-wider">
+                            IVIE STUDIO
+                        </h1>
+                        <p className="text-xl md:text-2xl text-[#6b6b6b] font-light tracking-widest">
+                            Thư Viện Khoảnh Khắc Hạnh Phúc
+                        </p>
+                    </motion.div>
+
+                    {/* Chỉ báo cuộn */}
+                    <motion.div
+                        style={{ opacity: useTransform(tienTrinhCuon, [0, 0.2], [1, 0]) }}
+                        className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20"
+                    >
+                        <motion.div
+                            animate={{ y: [0, 10, 0] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                            className="flex flex-col items-center"
+                        >
+                            <span className="text-[#6b6b6b] text-sm mb-2 tracking-widest">CUỘN XUỐNG</span>
+                            <svg className="w-6 h-6 text-[#b59410]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                            </svg>
+                        </motion.div>
+                    </motion.div>
+
+                    {/* Thanh tiến trình */}
+                    <motion.div
+                        className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#b59410] to-[#d4af37] origin-left z-30"
+                        style={{ scaleX: tienTrinhCuon }}
+                    />
+                </div>
+            </div>
         </div>
     );
 };

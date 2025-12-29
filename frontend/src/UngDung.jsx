@@ -6,6 +6,8 @@ import DauTrang from './thanh_phan/DauTrang';
 import ChanTrang from './thanh_phan/ChanTrang';
 import ChatBox from './thanh_phan/ChatBox';
 import HieuUngLaRoi from './thanh_phan/HieuUngLaRoi';
+import HieuUngChuyenTrang from './thanh_phan/HieuUngChuyenTrang';
+import CuonLenDau from './thanh_phan/CuonLenDau';
 import TrangChu from './trang/TrangChu';
 import SanPham from './trang/SanPham';
 import ChiTietSanPham from './trang/ChiTietSanPham';
@@ -24,6 +26,7 @@ import AntiGravityLanding from './trang/AntiGravityLanding';
 import ProductDetail from './trang/ProductDetail';
 import GalleryDemo from './trang/GalleryDemo';
 import CuonPhongTo from './trang/CuonPhongTo';
+import DemoHieuUng from './trang/DemoHieuUng';
 
 // Component to handle sal.js initialization on route change
 function SalInitializer() {
@@ -46,8 +49,10 @@ function UngDung() {
   return (
     <Router>
       <div className="App">
+        <CuonLenDau />
         <SalInitializer />
         <HieuUngLaRoi />
+        <HieuUngChuyenTrang />
         <DauTrang />
         <main>
           <Routes>
@@ -69,6 +74,7 @@ function UngDung() {
             <Route path="/san-pham-demo" element={<ProductDetail />} />
             <Route path="/gallery-demo" element={<GalleryDemo />} />
             <Route path="/cuon-phong-to" element={<CuonPhongTo />} />
+            <Route path="/demo-hieu-ung" element={<DemoHieuUng />} />
           </Routes>
 
         </main>

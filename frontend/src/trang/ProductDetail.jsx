@@ -442,7 +442,8 @@ export default function ProductDetail() {
             <ul>
               <li>Chất liệu: {sanPham.fabric_type || 'Ren cao cấp, lót satin mịn'}</li>
               <li>Màu sắc: {sanPham.color || 'Đa dạng'}</li>
-              <li>Size: {sanPham.recommended_size || 'Đủ size'}</li>
+              <li>Size có sẵn: {sanPham.recommended_size || 'Đủ size'}</li>
+              <li>Tông makeup: {sanPham.makeup_tone || 'Tự nhiên'}</li>
               <li>Bảo quản: Giặt khô chuyên nghiệp, bảo quản nơi khô ráo.</li>
             </ul>
           </div>

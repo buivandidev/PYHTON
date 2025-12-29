@@ -199,7 +199,7 @@ Ghi chú thêm: ${thongTin.ghiChu}
                                             ))}
                                         </ul>
                                         <NutBam
-                                            variant={goi.noi_bat ? 'primary' : 'outline'}
+                                            variant="outline"
                                             className="btn-block"
                                             onClick={() => chonGoiDichVu(goi)}
                                         >
